@@ -1,5 +1,6 @@
+import os
+
 import bottle
-import subprocess
 from bottle import request
 
 app = application = bottle.Bottle()
@@ -7,7 +8,9 @@ app = application = bottle.Bottle()
 
 @app.get('/.well-known/acme-challenge/<filename:path>')
 def challenge(filename):
-    return bottle.static_file(filename, root='./challenge')
+    return bottle.static_file(
+        filename,
+        root=os.path.join('./challenge', '.well-known', 'acme-challenge'))
 
 
 @app.get('/.certs/<filename:path>')
@@ -19,6 +22,7 @@ def get_certs(filename):
 def create_certs():
     domains = request.json.get('domains')
     email = request.json.get('email')
+
 
 #     result = subprocess.check_call([
 #                  "./certbot-auto", "certonly", "--standalone", "--agree-tos"

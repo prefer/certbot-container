@@ -134,5 +134,7 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
-.idea/
-challenge/.well-known
+.idea
+.git
+.gitignore
+
