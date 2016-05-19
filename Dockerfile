@@ -11,13 +11,13 @@ RUN ln -s certbot-auto letsencrypt-auto
 RUN ./letsencrypt-auto --help all
 
 
-RUN apt-get install -y uwsgi uwsgi-plugin-python python-bottle
+RUN apt-get install -y python-bottle
 #ADD bottle.ini /etc/uwsgi/apps-available/bottle.ini
 #RUN ln -s /etc/uwsgi/apps-available/bottle.ini /etc/uwsgi/apps-enabled/bottle.ini
 #RUN apt-get install -y supervisor
 
 #ADD bottle.conf /etc/nginx/conf.d/bottle.conf
-ADD app.py /var/www/bottle/app.py
+ADD app.py /opt/certbot/app.py
 #RUN rm -rf /var/lib/apt/lists/*
 #RUN rm /etc/nginx/conf.d/default.conf
 
@@ -29,4 +29,4 @@ VOLUME /etc/letsencrypt /var/lib/letsencrypt
 WORKDIR /opt/certbot
 #CMD ["nginx", "-g", "daemon off;"]
 #CMD ["supervisord", "-n"]
-CMD ["python", "/var/www/bottle/app.py", "80"]
+CMD ["python", "app.py", "80"]
