@@ -5,6 +5,8 @@ MAINTAINER Nikolay Telepenin <ntelepenin@cloudlinux.com>
 
 ENV DEBIAN_FRONTEND=noninteractive VENV_PATH=/root/venv
 
+WORKDIR /opt/certbot
+
 RUN apt-get update && apt-get install -y wget
 RUN wget https://dl.eff.org/certbot-auto && chmod a+x ./certbot-auto
 RUN ln -s certbot-auto letsencrypt-auto
@@ -25,8 +27,9 @@ ADD app.py /opt/certbot/app.py
 
 
 VOLUME /etc/letsencrypt /var/lib/letsencrypt
+COPY . /opt/certbot
 
-WORKDIR /opt/certbot
+
 #CMD ["nginx", "-g", "daemon off;"]
 #CMD ["supervisord", "-n"]
 CMD ["python", "app.py", "80"]
