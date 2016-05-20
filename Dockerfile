@@ -11,7 +11,9 @@ RUN wget https://dl.eff.org/certbot-auto && chmod a+x ./certbot-auto
 RUN ln -s certbot-auto letsencrypt-auto
 RUN ./letsencrypt-auto --help all
 
+RUN apt-get install -y python3-aiohttp
+
 VOLUME /etc/letsencrypt /var/lib/letsencrypt
 COPY . /opt/certbot
 
-CMD ["python", "server.py", "80"]
+CMD ["python3.5", "server.py", "80"]

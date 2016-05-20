@@ -1,53 +1,29 @@
 import base64
 import itertools
+import json
 import os
 import subprocess
 
-import bottle
-from bottle import request
-
-app = application = bottle.Bottle()
+from aiohttp import web
 
 
-@app.get('/.well-known/acme-challenge/<filename:path>')
-def challenge(filename):
-    """
-    Acme challenge for letsencrypt
-    https://letsencrypt.github.io/acme-spec/
-
-    :param filename:
-    :return:
-    """
-    return bottle.static_file(
-        filename,
-        root=os.path.join('./challenge', '.well-known', 'acme-challenge'))
-
-
-# If need to get certs uncomment below
-# @app.get('/.certs/')
-# def get_certs():
-#     domain = request.query.get('domain')
-#     assert domain
-#
-#     cert, privkey = _get_certs(domain)
-#     return {
-#         'cert': cert,
-#         'privkey': privkey
-#     }
-
-
-@app.post('/.certs/')
-def create_certs():
+async def create_certs(request):
     """
     Create certificate by letsencrypt for list of domains
 
     :return:
     """
-    domains = request.json.get('domains')
-    email = request.json.get('email')
+    data = await request.json()
+    domains = data.get('domains')
+    email = data.get('email')
+
     assert domains, "List of domains should be define"
     assert isinstance(domains, list), "Domains should be list"
     assert email, "Email should be define"
+
+    # return web.Response(
+    #     body=json.dumps(data).encode('utf-8'),
+    #     content_type='application/json')
 
     result = subprocess.check_call(
         [
@@ -66,14 +42,15 @@ def create_certs():
         raise SystemExit("Script ended with errors")
 
     # Folder with certs created by default for first domain
-    cert, privkey = _get_certs(domains[0])
-    return {
+    cert, private_key = await _get_certs(domains[0])
+
+    return web.Response(body=json.dumps({
         'cert': cert,
-        'privkey': privkey
-    }
+        'private_key': private_key
+    }).encode('utf-8'), content_type='application/json')
 
 
-def _get_certs(domain):
+async def _get_certs(domain):
     """
     Return base64 cert and private key from default location for store of
     certbot
@@ -86,17 +63,17 @@ def _get_certs(domain):
         cert = base64.b64encode(f.read())
 
     with open(os.path.join(certs_path, 'privkey.pem'), 'r') as f:
-        privkey = base64.b64encode(f.read())
+        private_key = base64.b64encode(f.read())
 
-    return cert, privkey
+    return cert, private_key
 
+
+app = web.Application()
+app.router.add_static(
+    prefix='/.well-known/acme-challenge/',
+    path='./challenge/.well-known/acme-challenge/', )
+app.router.add_route(
+    'POST', '/.certs/', create_certs)
 
 if __name__ == '__main__':
-    import sys
-
-    port = sys.argv[1]
-    assert port, "Port should be define"
-    bottle.run(
-        app=app,
-        host='0.0.0.0',
-        port=port)
+    web.run_app(app)
