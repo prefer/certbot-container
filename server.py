@@ -79,4 +79,4 @@ app.router.add_route(
 if __name__ == '__main__':
     port = sys.argv[1]
     assert port
-    web.run_app(app, port=port)
+    web.run_app(app, port=int(port))
