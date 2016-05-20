@@ -1,11 +1,19 @@
 import base64
 import itertools
 import json
+import logging
 import os
 import subprocess
-
 import sys
+
 from aiohttp import web
+
+logging.basicConfig(
+    format=u'%(levelname)-8s [%(asctime)s] %(message)s',
+    level=logging.DEBUG,
+    filename=u'server.log')
+
+logger = logging.getLogger(__name__)
 
 
 async def create_certs(request):
@@ -60,10 +68,10 @@ async def _get_certs(domain):
     :return: tuple base64 encoded cert and private key files
     """
     certs_path = os.path.join('/etc', 'letsencrypt', 'live', domain)
-    with open(os.path.join(certs_path, 'cert.pem'), 'r') as f:
+    with open(os.path.join(certs_path, 'cert.pem'), 'rb') as f:
         cert = base64.b64encode(f.read())
 
-    with open(os.path.join(certs_path, 'privkey.pem'), 'r') as f:
+    with open(os.path.join(certs_path, 'privkey.pem'), 'rb') as f:
         private_key = base64.b64encode(f.read())
 
     return cert, private_key
@@ -77,6 +85,8 @@ app.router.add_route(
     'POST', '/.certs/', create_certs)
 
 if __name__ == '__main__':
+    logger.info("Start")
     port = sys.argv[1]
     assert port
     web.run_app(app, port=int(port))
+    logger.info("Finish")
