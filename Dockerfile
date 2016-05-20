@@ -17,4 +17,6 @@ RUN pip3 install aiohttp
 VOLUME /etc/letsencrypt /var/lib/letsencrypt
 COPY . /opt/certbot
 
+RUN ./configure-dns.sh
+
 CMD ["python3.5", "server.py", "80"]
