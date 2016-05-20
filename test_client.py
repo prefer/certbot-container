@@ -26,10 +26,11 @@ def main(url, domains, email):
 
 if __name__ == '__main__':
     # Usage:
-    # python 3.5 test_client.py http://localhost:8080/.certs/ a.co,c.po a@a.cp
+    # python3.5 test_client.py http://localhost:8080/.certs/ a.co,c.po a@a.cp
     url = sys.argv[1]
     assert url, 'First parameter equals url and should be define'
     domains = sys.argv[2].split(',')
     assert domains
     email = sys.argv[3]
     assert email
+    main(url, domains, email)
