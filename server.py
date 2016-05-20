@@ -37,18 +37,18 @@ async def create_certs(request):
     #     content_type='application/json')
 
     process = await asyncio.create_subprocess_exec(
-        **[
-              '/opt/certbot/certbot-auto',
-              'certonly',
-              '--webroot',
-              '--no-self-upgrade',
-              '--agree-tos',
-              '-n',
-              '-v',
-              '-w', 'challenge/',
-              '--email', email
-          ] + [item for sublist in itertools.product(['-d'], domains)
-               for item in sublist],
+        *[
+             '/opt/certbot/certbot-auto',
+             'certonly',
+             '--webroot',
+             '--no-self-upgrade',
+             '--agree-tos',
+             '-n',
+             '-v',
+             '-w', 'challenge/',
+             '--email', email
+         ] + [item for sublist in itertools.product(['-d'], domains)
+              for item in sublist],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT
     )
