@@ -93,10 +93,10 @@ async def _get_certs(domain):
     """
     certs_path = os.path.join('/etc', 'letsencrypt', 'live', domain)
     with open(os.path.join(certs_path, 'cert.pem'), 'rb') as f:
-        cert = base64.b64encode(f.read())
+        cert = base64.b64encode(f.read()).decode("utf-8")
 
     with open(os.path.join(certs_path, 'privkey.pem'), 'rb') as f:
-        private_key = base64.b64encode(f.read())
+        private_key = base64.b64encode(f.read()).decode("utf-8") 
 
     return cert, private_key
 
