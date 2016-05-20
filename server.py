@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import itertools
 import json
@@ -22,6 +23,7 @@ async def create_certs(request):
 
     :return:
     """
+    logger.debug("Start request")
     data = await request.json()
     domains = data.get('domains')
     email = data.get('email')
@@ -34,25 +36,47 @@ async def create_certs(request):
     #     body=json.dumps(data).encode('utf-8'),
     #     content_type='application/json')
 
-    result = subprocess.check_call(
-        [
-            '/opt/certbot/certbot-auto',
-            'certonly',
-            '--webroot',
-            '--no-self-upgrade',
-            '--agree-tos',
-            '-n',
-            '-w', 'challenge/',
-            '--email', email
-        ] + [item for sublist in itertools.product(['-d'], domains)
-             for item in sublist]
+    process = await asyncio.create_subprocess_exec(
+        **[
+              '/opt/certbot/certbot-auto',
+              'certonly',
+              '--webroot',
+              '--no-self-upgrade',
+              '--agree-tos',
+              '-n',
+              '-v',
+              '-w', 'challenge/',
+              '--email', email
+          ] + [item for sublist in itertools.product(['-d'], domains)
+               for item in sublist],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT
     )
-    if result != 0:
+
+    stdout, _ = await process.communicate()
+    print(stdout)
+
+    # result = subprocess.check_call(
+    #     [
+    #         '/opt/certbot/certbot-auto',
+    #         'certonly',
+    #         '--webroot',
+    #         '--no-self-upgrade',
+    #         '--agree-tos',
+    #         '-n',
+    #         '-v',
+    #         '-w', 'challenge/',
+    #         '--email', email
+    #     ] + [item for sublist in itertools.product(['-d'], domains)
+    #          for item in sublist]
+    # )
+    if process.returncode != 0:
         raise SystemExit("Script ended with errors")
 
     # Folder with certs created by default for first domain
     cert, private_key = await _get_certs(domains[0])
 
+    logger.debug("Finish request")
     return web.Response(body=json.dumps({
         'cert': cert,
         'private_key': private_key
@@ -80,7 +104,7 @@ async def _get_certs(domain):
 app = web.Application()
 app.router.add_static(
     prefix='/.well-known/acme-challenge/',
-    path='./challenge/.well-known/acme-challenge/', )
+    path='/opt/certbot/challenge/.well-known/acme-challenge/', )
 app.router.add_route(
     'POST', '/.certs/', create_certs)
 

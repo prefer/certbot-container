@@ -21,7 +21,7 @@ def main(url, domains, email):
     with aiohttp.ClientSession(loop=loop) as session:
         data = loop.run_until_complete(
             fetch(session, url, {'domains': domains, "email": email}))
-        print(json.loads(data))
+        print(data)
 
 
 if __name__ == '__main__':
