@@ -6,7 +6,7 @@ import aiohttp
 
 
 async def fetch(session, url, data):
-    with aiohttp.Timeout(10):
+    with aiohttp.Timeout(360):
         async with session.post(
             url,
             data=json.dumps(data),

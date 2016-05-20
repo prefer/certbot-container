@@ -4,6 +4,7 @@ import json
 import os
 import subprocess
 
+import sys
 from aiohttp import web
 
 
@@ -76,4 +77,6 @@ app.router.add_route(
     'POST', '/.certs/', create_certs)
 
 if __name__ == '__main__':
-    web.run_app(app)
+    port = sys.argv[1]
+    assert port
+    web.run_app(app, port=port)

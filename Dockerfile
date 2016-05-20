@@ -11,10 +11,8 @@ RUN wget https://dl.eff.org/certbot-auto && chmod a+x ./certbot-auto
 RUN ln -s certbot-auto letsencrypt-auto
 RUN ./letsencrypt-auto --help all
 
-RUN apt-get install -y python3-pip && pip3 install aiohttp
-RUN cat >> /etc/resolv.conf<<EOF
-nameserver 8.8.8.8
-EOF
+RUN apt-get install -y python3-pip
+RUN pip3 install aiohttp
 
 VOLUME /etc/letsencrypt /var/lib/letsencrypt
 COPY . /opt/certbot
