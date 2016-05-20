@@ -32,6 +32,8 @@ async def create_certs(request):
     assert isinstance(domains, list), "Domains should be list"
     assert email, "Email should be define"
 
+    additional_params = data.get('certbot-additional-params', [])
+
     # return web.Response(
     #     body=json.dumps(data).encode('utf-8'),
     #     content_type='application/json')
@@ -44,18 +46,14 @@ async def create_certs(request):
              '--no-self-upgrade',
              '--agree-tos',
              '-n',
-             '-v',
-             '--staging',
              '-w', 'challenge/',
              '--email', email
          ] + [item for sublist in itertools.product(['-d'], domains)
-              for item in sublist],
+              for item in sublist] + additional_params,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT
     )
-
-    stdout, _ = await process.communicate()
-    print(stdout)
+    await process.communicate()
 
     if process.returncode != 0:
         raise SystemExit("Script ended with errors")
