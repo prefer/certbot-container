@@ -23,7 +23,7 @@ async def create_certs(request):
 
     :return:
     """
-    logger.debug("Start request")
+    logger.debug("Start request with id '{}'".format(id(request)))
     data = await request.json()
     domains = data.get('domains')
     email = data.get('email')
@@ -45,6 +45,7 @@ async def create_certs(request):
              '--agree-tos',
              '-n',
              '-v',
+             '--staging',
              '-w', 'challenge/',
              '--email', email
          ] + [item for sublist in itertools.product(['-d'], domains)
@@ -56,27 +57,13 @@ async def create_certs(request):
     stdout, _ = await process.communicate()
     print(stdout)
 
-    # result = subprocess.check_call(
-    #     [
-    #         '/opt/certbot/certbot-auto',
-    #         'certonly',
-    #         '--webroot',
-    #         '--no-self-upgrade',
-    #         '--agree-tos',
-    #         '-n',
-    #         '-v',
-    #         '-w', 'challenge/',
-    #         '--email', email
-    #     ] + [item for sublist in itertools.product(['-d'], domains)
-    #          for item in sublist]
-    # )
     if process.returncode != 0:
         raise SystemExit("Script ended with errors")
 
     # Folder with certs created by default for first domain
     cert, private_key = await _get_certs(domains[0])
 
-    logger.debug("Finish request")
+    logger.debug("Finish with id '{}'".format(id(request)))
     return web.Response(body=json.dumps({
         'cert': cert,
         'private_key': private_key
@@ -96,7 +83,7 @@ async def _get_certs(domain):
         cert = base64.b64encode(f.read()).decode("utf-8")
 
     with open(os.path.join(certs_path, 'privkey.pem'), 'rb') as f:
-        private_key = base64.b64encode(f.read()).decode("utf-8") 
+        private_key = base64.b64encode(f.read()).decode("utf-8")
 
     return cert, private_key
 
@@ -109,8 +96,8 @@ app.router.add_route(
     'POST', '/.certs/', create_certs)
 
 if __name__ == '__main__':
-    logger.info("Start")
+    logger.info("Start server")
     port = sys.argv[1]
     assert port
     web.run_app(app, port=int(port))
-    logger.info("Finish")
+    logger.info("Finish server")
