@@ -1,4 +1,4 @@
-# Container with 
+# Certbot for generation TLS certs
 
 ## Prerequisites
 * Docker 1.10 or higher
