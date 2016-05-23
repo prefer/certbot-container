@@ -17,13 +17,14 @@ logger = logging.getLogger(__name__)
 async def fetch(session, url, data, seconds):
     await asyncio.sleep(seconds)
     print('run with {}'.format(seconds))
-    async with session.post(
-        url,
-        data=json.dumps(data),
-        headers={'content-type': 'application/json'}
-    ) as response:
-        response = await response.text()
-        return response
+    with aiohttp.Timeout(180):
+        async with session.post(
+            url,
+            data=json.dumps(data),
+            headers={'content-type': 'application/json'}
+        ) as response:
+            response = await response.text()
+            return response
 
 
 def main(params):
@@ -52,13 +53,6 @@ def main(params):
 
 
 def _create_fixtures(prefix, domain, email, n=1):
-    """
-
-    :param prefix:
-    :param domain:
-    :param email:
-    :return:
-    """
     data = []
     for i in range(n):
         data.append([
@@ -76,13 +70,20 @@ def _create_fixtures(prefix, domain, email, n=1):
 
 if __name__ == '__main__':
     # Usage:
-    n = sys.argv[1]
-    assert n
+    # python3.5 test_client.py a cl-owncloud.pro ntelepenin@cloudlinux.com 5
+    prefix = sys.argv[1]
+    domain = sys.argv[2]
+    email = sys.argv[3]
+    n = sys.argv[4]
+
+    assert prefix
+    assert domain
+    assert email
 
     _create_fixtures(
-        'a-{}-'.format(str(uuid4())[:8]),
-        'cl-owncloud.pro',
-        'ntelepenin@cloudlinux.com',
+        '{}-{}-'.format(prefix, str(uuid4())[:8]),
+        '{}'.format(domain),
+        '{}'.format(email),
         int(n)
     )
     with open('fixtures.json', 'r') as f:

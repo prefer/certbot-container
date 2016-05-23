@@ -34,10 +34,6 @@ async def create_certs(request):
 
     additional_params = data.get('certbot-additional-params', [])
 
-    # return web.Response(
-    #     body=json.dumps(data).encode('utf-8'),
-    #     content_type='application/json')
-
     process = await asyncio.create_subprocess_exec(
         *[
              '/opt/certbot/certbot-auto',
